@@ -21,9 +21,12 @@
             ],
             "matches": [
                 "https://www.supremenewyork.com/*",
-                "https://supremenewyork.com/*",
-                "<all_urls>"
+                "https://supremenewyork.com/*"
             ]
         }
-    ]
+    ],
+    "background": {
+        "persistent": true,
+        "scripts": ["background.js"]
+      }
 }
