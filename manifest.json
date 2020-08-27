@@ -27,6 +27,15 @@
     ],
     "background": {
         "persistent": true,
-        "scripts": ["background.js"]
-      }
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "webRequest",
+        "webRequestBlocking",
+        "storage"
+    ]
 }

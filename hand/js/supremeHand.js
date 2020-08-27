@@ -3,58 +3,83 @@ url:https://www.supremenewyork.com/shop/all/xxx xxx表示类目
 */
 //delay
 console.log('Handbot forever');
-let delay = (time) => {
-    return new Promise((resolve) => {
-        setTimeout(resolve, time);
-    })
-}
+
 //首字母大写
 let firstUpperCase = ([first, ...rest]) => {
     return first.toUpperCase() + rest.join('');
 }
 
-let addToCart = () => {
-    //定义基础url路径
-    let baseUrl = 'https://www.supremenewyork.com/shop/all/';
-
+let getCustomInfo = () => {
     //获取类目,关键字,尺码,延迟时间
-    let category = document.querySelector('#category').value;
-    let customKeyword = document.querySelector('#keyword-input').value;
-    let customColor = document.querySelector('#color-input').value;
-    let customSize = document.querySelector('#size-input').value;
-    let customDelay = document.querySelector('#delay-input').value;
-    //跳转
-    location.href = baseUrl + category;
-
-    //获取商品和颜色
-    window.onload = () => {
-        let productArr = document.querySelectorAll('.product-name .name-link');
-        let colorArr = document.querySelectorAll('.product-style .name-link');
-        for (let i = 0; i < productArr.length; i++) {
-            if (productArr[i].innerHTML.indexOf(firstUpperCase(customKeyword)) !== -1 && colorArr[i].innerHTML.indexOf(customColor) !== -1) {
-                productArr[i].click();
-                break;
-            }
-        }
-        //进入商品后获取尺码选项 选中尺码并加车
-        window.onload = async () => {
-            let productSizeSelectArr = document.querySelectorAll('select#s option');
-            for (let i = 0; i < productSizeSelectArr.length; i++) {
-                if (productSizeSelectArr[i].innerHTML.indexOf(customSize) !== -1) {
-                    productSizeSelectArr[i].selected = true;
-                    break;
-                }
-            }
-            document.querySelector('#add-remove-buttons input').click();
-            //加车后点击进入结账页面
-            await delay(500);
-            document.querySelector('#cart a.checkout').click();
-        }
+    let message = {
+        category: document.querySelector('#category').value,
+        keyword: firstUpperCase(document.querySelector('#keyword-input').value),
+        color: firstUpperCase(document.querySelector('#color-input').value),
+        size: firstUpperCase(document.querySelector('#size-input').value),
+        delay: document.querySelector('#delay-input').value
     }
+
+    chrome.storage.sync.set(message, () => { console.log('Save') });
+
+    let params = {
+        active: true,
+        currentWindow: true
+    }
+    chrome.tabs.query(params, (tabs) => {
+        // let port = chrome.tabs.connect(tabs[0].id, {
+        //     name: 'popup-msg'
+        // })
+        // port.postMessage(message);
+        // port.onMessage.addListener((msg) => {
+        //     console.log(msg)
+        //     addToCart();
+        // })
+
+        chrome.tabs.sendMessage(tabs[0].id, message, (res) => {
+            if (res) {
+                console.log(res);
+                setTimeout(() => {
+                    addToCart();
+                }, 1000);
+            }
+        });
+    })
 }
 
-document.querySelector('#start-btn').addEventListener('click',()=>{
-    console.log('Click that button');
-    addToCart()
-},true);
+let addToCart = () => {
+    // chrome.tabs.query({
+    //     active: true,
+    //     currentWindow: true
+    // }, (tabs) => {
+    //     let message = {
+    //         info: 'start'
+    //     }
+    //     chrome.tabs.sendMessage(tabs[0].id, message, (res) => {
+    //         console.log('Start to add');
+    //     })
+    // })
+
+    /*
+        使用长链接传递到background.js
+        再由background.js与content script通信    
+    */
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, (tabs) => {
+        let port = chrome.tabs.connect(tabs[0].id, {
+            name: 'supreme'
+        })
+        port.postMessage('start');
+        port.onMessage.addListener((msg) => {
+            console.log(msg);
+        })
+    })
+
+}
+
+document.querySelector('#start-btn').addEventListener('click', () => {
+    console.log('Clicked start button');
+    getCustomInfo();
+}, true);
 
