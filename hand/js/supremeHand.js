@@ -1,8 +1,8 @@
 /*
-url:https://www.supremenewyork.com/shop/all/xxx xxx表示类目
+    popup端
+    与content端进行通信
 */
-//delay
-console.log('Handbot forever');
+console.log('Popup');
 
 //首字母大写
 let firstUpperCase = ([first, ...rest]) => {
@@ -21,20 +21,15 @@ let getCustomInfo = () => {
 
     chrome.storage.sync.set(message, () => { console.log('Save') });
 
+    /* 
+        使用短连接进行第一次通信,把输入的数据传递过去
+        当接收到content_script返回的信息后,进行下一步addToCart的操作
+    */
     let params = {
         active: true,
         currentWindow: true
     }
     chrome.tabs.query(params, (tabs) => {
-        // let port = chrome.tabs.connect(tabs[0].id, {
-        //     name: 'popup-msg'
-        // })
-        // port.postMessage(message);
-        // port.onMessage.addListener((msg) => {
-        //     console.log(msg)
-        //     addToCart();
-        // })
-
         chrome.tabs.sendMessage(tabs[0].id, message, (res) => {
             if (res) {
                 console.log(res);
@@ -46,23 +41,11 @@ let getCustomInfo = () => {
     })
 }
 
+/*
+    使用长链接通信 避免发起两次短连接造成重复
+    使用两次短连接会导致接收端错误接收信息 如本项目中第一次传递过去的数据会被第二次的覆盖
+*/
 let addToCart = () => {
-    // chrome.tabs.query({
-    //     active: true,
-    //     currentWindow: true
-    // }, (tabs) => {
-    //     let message = {
-    //         info: 'start'
-    //     }
-    //     chrome.tabs.sendMessage(tabs[0].id, message, (res) => {
-    //         console.log('Start to add');
-    //     })
-    // })
-
-    /*
-        使用长链接传递到background.js
-        再由background.js与content script通信    
-    */
     chrome.tabs.query({
         active: true,
         currentWindow: true
