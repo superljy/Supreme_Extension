@@ -1,4 +1,4 @@
-console.log('Hand Bot Forever');
+console.log('Content_Script');
 
 //延迟
 let delay = (time) => {
@@ -42,25 +42,48 @@ let addToCart = async () => {
         //获取商品和颜色
         let productArr = document.querySelectorAll('.product-name .name-link');
         let colorArr = document.querySelectorAll('.product-style .name-link');
-        
-        for (let i = 0; i < productArr.length; i++) {
-            if (productArr[i].innerHTML.indexOf(customInfo.keyword) !== -1 && colorArr[i].innerHTML.indexOf(customInfo.color) !== -1) {
-                productArr[i].click();
-                break;
-            }
-        }
+        selectProduct(productArr, colorArr, customInfo);
+
         //进入商品后获取尺码选项 选中尺码并加车
-        await delay(customInfo.delay);
+        await delay(parseInt(customInfo.delay));
+
         let productSizeSelectArr = document.querySelectorAll('select#s option');
-        for (let i = 0; i < productSizeSelectArr.length; i++) {
-            if (productSizeSelectArr[i].innerHTML.indexOf(customInfo.size) !== -1) {
-                productSizeSelectArr[i].selected = true;
-                break;
-            }
-        }
-        document.querySelector('#add-remove-buttons input').click();
+
+        // if (soldOut) {
+        //     console.log('Product Sold-out');
+        //     location.reload();
+        //     addToCart();
+        // } else {
+        //     selectSize(productSizeSelectArr, customInfo);
+        // }
+        selectSize(productSizeSelectArr, customInfo);
+
         //加车后点击进入结账页面
-        await delay(customInfo.delay);
+        await delay(parseInt(customInfo.delay));
         document.querySelector('#cart a.checkout').click();
     }
+
+}
+
+let selectProduct = (productArr, colorArr, customInfo) => {
+    for (let i = 0; i < productArr.length; i++) {
+        if (productArr[i].innerHTML.indexOf(customInfo.keyword) !== -1 && colorArr[i].innerHTML.indexOf(customInfo.color) !== -1) {
+            productArr[i].click();
+            break;
+        }
+    }
+}
+
+let selectSize = (sizeArr, customInfo) => {
+    let soldOut = document.querySelector('#add-remove-buttons b.sold-out');
+    if (soldOut) {
+        alert('Product Sold-out,please retry..');
+    }
+    for (let i = 0; i < sizeArr.length; i++) {
+        if (sizeArr[i].innerHTML.indexOf(customInfo.size) !== -1) {
+            sizeArr[i].selected = true;
+            break;
+        }
+    }
+    document.querySelector('#add-remove-buttons input').click();
 }
