@@ -1,6 +1,8 @@
 html,
 body,
 div,
+ul,
+li,
 input,
 select,
 option {
@@ -9,6 +11,11 @@ option {
     box-sizing: border-box;
     border: 0;
     outline: none;
+}
+
+ul,
+li {
+    list-style: none;
 }
 
 html,
@@ -30,9 +37,54 @@ h2 {
     color: crimson;
     font-weight: bold;
     font-size: 40px;
+    margin: 20px;
 }
 
-.input-areas {
+.tab {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: center;
+    margin-bottom: 20px;
+}
+
+.tab .tab-active {
+    background: crimson;
+    color: #ffffff;
+}
+
+.tab li {
+    width: 120px;
+    border: 1px solid #dddddd;
+    padding: 5px;
+    text-align: center;
+    border-right: 0;
+    cursor: pointer;
+}
+
+.tab li:last-child {
+    border-right: 1px solid #dddddd;
+}
+
+.content {
+    width: 100%;
+    height: 400px;
+    position: relative;
+}
+
+.content li {
+    position: absolute;
+    display: none;
+}
+
+.content .content-active {
+    display: block;
+}
+
+.product-areas,
+.billing-areas,
+.card-areas {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -40,8 +92,10 @@ h2 {
     flex-direction: column;
 }
 
-.input-areas div {
-    width: 85%;
+.product-areas div,
+.billing-areas div,
+.card-areas div {
+    width: 100%;
     height: 50px;
     margin-bottom: 2vh;
     border: 1px solid #dddddd;
@@ -49,11 +103,55 @@ h2 {
     padding: 10px;
 }
 
-.input-areas div input,
-.input-areas div select {
+.content .billing-address,
+.content .billing-info,
+.content .card-time {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border: 0;
+    padding: 0;
+}
+
+.content .billing-address input,
+.content .billing-info input,
+.content .card-time input {
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.product-areas div input,
+.product-areas div select,
+.billing-areas div input,
+.card-areas div input {
     width: 100%;
     height: 100%;
 }
+
+.content .billing-address input:nth-child(1) {
+    flex: 2;
+    margin-right: 5px;
+}
+
+.content .billing-address input:nth-child(2) {
+    flex: 1;
+}
+
+.content .billing-info input:nth-child(1) {
+    margin-right: 5px;
+}
+
+.content .billing-info input:nth-child(2) {
+    margin-right: 5px;
+}
+
+.content .card-time input:first-child {
+    margin-right: 5px;
+}
+
+
 
 #start-btn {
     width: 45%;

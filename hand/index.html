@@ -11,35 +11,78 @@
 <body>
     <div class="container">
         <h2>Supreme Hand</h2>
-        <div class="input-areas">
-            <div class="keyword">
-                <input type="text" placeholder="keyword" id="keyword-input" />
-            </div>
-            <div class="category">
-                <select name="category" id="category">
-                    <option value="jackets">Jackets</option>
-                    <option value="shirts">Shirts</option>
-                    <option value="tops_sweaters">Tops/Sweaters</option>
-                    <option value="sweatshirts">Sweatshirts</option>
-                    <option value="pants">Pants</option>
-                    <option value="shorts">Shorts</option>
-                    <option value="t-shirts">T-shirts</option>
-                    <option value="hats">Hats</option>
-                    <option value="bags">Bags</option>
-                    <option value="accessories">Accessories</option>
-                    <option value="skate">Skate</option>
-                </select>
-            </div>
-            <div class="color">
-                <input type="text" placeholder="color" id="color-input" />
-            </div>
-            <div class="size">
-                <input type="text" placeholder="size" id="size-input" />
-            </div>
-            <div class="delay">
-                <input type="text" placeholder="delay" id="delay-input" />
-            </div>
-        </div>
+        <ul class="tab">
+            <li class="tab-active">Product</li>
+            <li>Billing</li>
+            <li>Card</li>
+        </ul>
+        <ul class="content">
+            <li class="product-areas content-active">
+                <div class="keyword">
+                    <input type="text" placeholder="keyword" id="keyword-input" />
+                </div>
+                <div class="category">
+                    <select name="category" id="category">
+                        <option value="jackets">Jackets</option>
+                        <option value="shirts">Shirts</option>
+                        <option value="tops_sweaters">Tops/Sweaters</option>
+                        <option value="sweatshirts">Sweatshirts</option>
+                        <option value="pants">Pants</option>
+                        <option value="shorts">Shorts</option>
+                        <option value="t-shirts">T-shirts</option>
+                        <option value="hats">Hats</option>
+                        <option value="bags">Bags</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="skate">Skate</option>
+                    </select>
+                </div>
+                <div class="color">
+                    <input type="text" placeholder="color" id="color-input" />
+                </div>
+                <div class="size">
+                    <input type="text" placeholder="size" id="size-input" />
+                </div>
+                <div class="delay">
+                    <input type="text" placeholder="delay" id="delay-input" />
+                </div>
+            </li>
+            <li class="billing-areas">
+                <div class="billing-name">
+                    <input type="text" id="fullname" placeholder="Fullname">
+                </div>
+                <div class="billing-email">
+                    <input type="text" id="email" placeholder="Email">
+                </div>
+                <div class="billing-tel">
+                    <input type="text" id="telephone" placeholder="Telephone">
+                </div>
+                <div class="billing-address">
+                    <input type="text" id="address" placeholder="Address 1">
+                    <input type="text" id="address2" placeholder="Address 2">
+                </div>
+                <div class="billing-info">
+                    <input type="text" id="zip" placeholder="Zipcode">
+                    <input type="text" id="city" placeholder="City">
+                    <input type="text" id="state" placeholder="State">
+                </div>
+                <div class="billing-country">
+                    <input type="text" id="country" placeholder="Country">
+                </div>
+            </li>
+            <li class="card-areas">
+                <div class="card-number">
+                    <input type="text" id="number" placeholder="Card Number">
+                </div>
+                <div class="card-time">
+                    <input type="text" id="month" placeholder="Month">
+                    <input type="text" id="year" placeholder="Year">
+                </div>
+                <div class="card-cvv">
+                    <input type="text" id="cvv" placeholder="CVV">
+                </div>
+            </li>
+        </ul>
+
         <div id="start-btn">Start</div>
     </div>
     <script src="./js/supremeHand.js"></script>
