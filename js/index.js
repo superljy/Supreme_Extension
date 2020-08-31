@@ -70,14 +70,14 @@ let addToCart = async () => {
         selectProduct(productArr, colorArr, customInfo);
 
         //进入商品后获取尺码选项 选中尺码并加车
-        if (location.href !== 'https://www.supremenewyork.com/shop/') {
-            let productSizeSelectArr = document.querySelectorAll('select#s option');
-            selectSize(productSizeSelectArr, customInfo);
+        await delay(parseInt(customInfo.delay));
+        let productSizeSelectArr = document.querySelectorAll('select#s option');
+        selectSize(productSizeSelectArr, customInfo);
 
-            //加车后点击进入结账页面
-            await delay(parseInt(customInfo.delay));
-            document.querySelector('#cart a.checkout').click();
-        }
+        //加车后点击进入结账页面
+        await delay(parseInt(customInfo.delay));
+        document.querySelector('#cart a.checkout').click();
+
     }
 }
 
@@ -92,10 +92,11 @@ let selectProduct = (productArr, colorArr, customInfo) => {
         if (productArr[i].innerHTML.indexOf(customInfo.keyword) !== -1 && colorArr[i].innerHTML.indexOf(customInfo.color) !== -1) {
             productArr[i].click();
             break;
-        } else {
-            alert('Could not found out your product,please confirm your custom setting for the product');
-            location.href = 'https://www.supremenewyork.com/shop/';
         }
+        // else {
+        //     alert('Could not found out your product,please confirm your custom setting for the product');
+        //     location.href = 'https://www.supremenewyork.com/shop/';
+        // }
     }
 }
 
