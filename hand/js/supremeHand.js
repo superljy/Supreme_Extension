@@ -58,7 +58,8 @@ window.onload = () => {
         number: null,
         month: null,
         year: null,
-        cvv: null
+        cvv: null,
+        webhook: null
     }, (result) => {
         console.log(result)
         document.querySelector('#category').value = result.category;
@@ -79,7 +80,7 @@ window.onload = () => {
         document.querySelector('#month').value = result.month;
         document.querySelector('#year').value = result.year;
         document.querySelector('#cvv').value = result.cvv;
-
+        document.querySelector('#webhook').value = result.webhook;
     });
 
     //设定好关键字等抢购信息后点击开始运行
@@ -206,7 +207,8 @@ let chromeStorage = () => {
         number: document.querySelector('#number').value,
         month: document.querySelector('#month').value,
         year: document.querySelector('#year').value,
-        cvv: document.querySelector('#cvv').value
+        cvv: document.querySelector('#cvv').value,
+        webhook: document.querySelector('#webhook').value
     }
     chrome.storage.sync.set(storageInfo, () => {
         console.log('Save base infomation.')

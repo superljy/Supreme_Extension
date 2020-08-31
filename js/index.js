@@ -106,6 +106,11 @@ let selectSize = (sizeArr, customInfo) => {
     if (soldOut) {
         alert('Product Sold-out,please retry or change product..');
     }
+    const sizes = ['Small', 'Medium', 'Large', 'XLarge'];
+    if (customInfo.size.toLowerCase() === 'random') {
+        let sizeIndex = getRandom(0, 3);
+        customInfo.size = sizes[sizeIndex];
+    }
     for (let i = 0; i < sizeArr.length; i++) {
         if (sizeArr[i].innerHTML.indexOf(customInfo.size) !== -1) {
             sizeArr[i].selected = true;
@@ -114,6 +119,7 @@ let selectSize = (sizeArr, customInfo) => {
     }
     document.querySelector('#add-remove-buttons input').click();
 }
+
 //结账方法
 let checkout = (checkoutInfo) => {
     console.log(checkoutInfo);
@@ -135,4 +141,11 @@ let checkout = (checkoutInfo) => {
     setTimeout(() => {
         document.querySelector('#pay input.button').click();
     }, 500);
+}
+
+//获取随机正数
+let getRandom = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }

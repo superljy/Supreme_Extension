@@ -151,7 +151,10 @@ h2 {
     margin-right: 5px;
 }
 
-
+.content .card-areas p {
+    font-size: 22px;
+    font-weight: bold;
+}
 
 #start-btn {
     width: 45%;
