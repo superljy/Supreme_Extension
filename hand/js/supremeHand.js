@@ -103,7 +103,7 @@ let getCustomInfo = () => {
     let message = {
         category: document.querySelector('#category').value,
         keyword: firstUpperCase(document.querySelector('#keyword-input').value),
-        color: firstUpperCase(document.querySelector('#color-input').value),
+        color: document.querySelector('#color-input').value,
         size: firstUpperCase(document.querySelector('#size-input').value),
         delay: document.querySelector('#delay-input').value,
         msgSymbol: 'redirect to category'
@@ -189,10 +189,22 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
 
 //获取billing card等基础信息 并储存到chrome.storage里
 let chromeStorage = () => {
+    //color 判断color是否多个单词组成 并转换首字母大写
+    let color = document.querySelector('#color-input').value;
+    if (color.indexOf(' ') !== -1) {
+        let colorArr = color.split(' ');
+        let upperColor = [];
+        for (c of colorArr) {
+            upperColor.push(firstUpperCase(c));
+        }
+        color = upperColor.join(' ');
+    } else {
+        color = firstUpperCase(color);
+    }
     let storageInfo = {
         category: document.querySelector('#category').value,
         keyword: firstUpperCase(document.querySelector('#keyword-input').value),
-        color: firstUpperCase(document.querySelector('#color-input').value),
+        color: color,
         size: firstUpperCase(document.querySelector('#size-input').value),
         delay: document.querySelector('#delay-input').value,
         fullname: document.querySelector('#fullname').value,

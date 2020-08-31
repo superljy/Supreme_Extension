@@ -70,15 +70,15 @@ let addToCart = async () => {
         selectProduct(productArr, colorArr, customInfo);
 
         //进入商品后获取尺码选项 选中尺码并加车
-        await delay(parseInt(customInfo.delay));
-        let productSizeSelectArr = document.querySelectorAll('select#s option');
-        selectSize(productSizeSelectArr, customInfo);
+        if (location.href !== 'https://www.supremenewyork.com/shop/') {
+            let productSizeSelectArr = document.querySelectorAll('select#s option');
+            selectSize(productSizeSelectArr, customInfo);
 
-        //加车后点击进入结账页面
-        await delay(parseInt(customInfo.delay));
-        document.querySelector('#cart a.checkout').click();
+            //加车后点击进入结账页面
+            await delay(parseInt(customInfo.delay));
+            document.querySelector('#cart a.checkout').click();
+        }
     }
-
 }
 
 /**
@@ -92,6 +92,9 @@ let selectProduct = (productArr, colorArr, customInfo) => {
         if (productArr[i].innerHTML.indexOf(customInfo.keyword) !== -1 && colorArr[i].innerHTML.indexOf(customInfo.color) !== -1) {
             productArr[i].click();
             break;
+        } else {
+            alert('Could not found out your product,please confirm your custom setting for the product');
+            location.href = 'https://www.supremenewyork.com/shop/';
         }
     }
 }
@@ -105,19 +108,21 @@ let selectSize = (sizeArr, customInfo) => {
     let soldOut = document.querySelector('#add-remove-buttons b.sold-out');
     if (soldOut) {
         alert('Product Sold-out,please retry or change product..');
-    }
-    const sizes = ['Small', 'Medium', 'Large', 'XLarge'];
-    if (customInfo.size.toLowerCase() === 'random') {
-        let sizeIndex = getRandom(0, 3);
-        customInfo.size = sizes[sizeIndex];
-    }
-    for (let i = 0; i < sizeArr.length; i++) {
-        if (sizeArr[i].innerHTML.indexOf(customInfo.size) !== -1) {
-            sizeArr[i].selected = true;
-            break;
+    } else {
+        const sizes = ['Small', 'Medium', 'Large', 'XLarge'];
+        if (customInfo.size.toLowerCase() === 'random') {
+            let sizeIndex = getRandom(0, 3);
+            customInfo.size = sizes[sizeIndex];
         }
+        for (let i = 0; i < sizeArr.length; i++) {
+            if (sizeArr[i].innerHTML.indexOf(customInfo.size) !== -1) {
+                sizeArr[i].selected = true;
+                break;
+            }
+        }
+        document.querySelector('#add-remove-buttons input').click();
     }
-    document.querySelector('#add-remove-buttons input').click();
+
 }
 
 //结账方法
