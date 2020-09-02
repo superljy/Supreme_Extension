@@ -1,6 +1,8 @@
 # Supreme_Extension
 ![version](https://img.shields.io/badge/Version-2.0.1-red)
 
+![image](https://github.com/superljy/Supreme_Extension/blob/master/img/128.png)
+
 ## Feature
 - Find your custom item then auto cart it and auto checkout.
 - You can input `keyword` `size` `color` to search and cart something what you want.
