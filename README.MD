@@ -10,9 +10,9 @@
 - If you find bug,feel free to tell me and I will fix it asap.
 
 ## How to use
-> Just use like other extensions,no skill.
-> Input some infomation what you want(ex.keyword,size,color),for color and size you can input `random`.
-> Fill the billing info and credit card info.The extension will auto save your info that you can use next time convenience.
-> After you fill out all info, press `start` button.It will work.
-> Enjoy~
+- Just use like other extensions,no skill.
+- Input some infomation what you want(ex.keyword,size,color),for color and size you can input `random`.
+- Fill the billing info and credit card info.The extension will auto save your info that you can use next time convenience.
+- After you fill out all info, press `start` button.It will work.
+- Enjoy~
 
