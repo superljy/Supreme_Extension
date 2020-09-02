@@ -1,10 +1,21 @@
+/**
+ * Created by August@2020.8
+ * Content_Script
+ * 
+ */
+
 console.log('Content_Script');
 
 //延迟
-let delay = (time) => {
+const delay = (time) => {
     return new Promise((resolve) => {
         setTimeout(resolve, time);
     })
+}
+
+//首字母大写
+const firstUpperCase = ([first, ...rest]) => {
+    return first.toUpperCase() + rest.join('');
 }
 
 /*
@@ -61,7 +72,7 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
 /**
  * 选择分类跳转后添加购物车操作
  */
-let addToCart = async () => {
+const addToCart = async () => {
     let customInfo = JSON.parse(window.localStorage.customInfo);
     if (location.href === 'https://www.supremenewyork.com/shop/all/' + customInfo.category) {
         //获取商品和颜色
@@ -83,20 +94,31 @@ let addToCart = async () => {
 
 /**
  * 判断关键字与颜色 选择商品方法
- * @param {页面中所有商品的数组} productArr 
+ * @param {页面中所有商品标题的数组} productArr 
  * @param {对应商品颜色的数组} colorArr 
  * @param {自定义关键字 颜色 尺码信息} customInfo 
  */
-let selectProduct = (productArr, colorArr, customInfo) => {
-    for (let i = 0; i < productArr.length; i++) {
-        if (productArr[i].innerHTML.indexOf(customInfo.keyword) !== -1 && colorArr[i].innerHTML.indexOf(customInfo.color) !== -1) {
-            productArr[i].click();
-            break;
+const selectProduct = (productArr, colorArr, customInfo) => {
+    if (customInfo.color.toLowerCase() === 'random') {
+        let newProduct = [];
+        for (let i = 0; i < productArr.length; i++) {
+            if (productArr[i].innerHTML.indexOf(firstUpperCase(customInfo.keyword)) !== -1) {
+                newProduct.push(productArr[i]);
+            }
         }
-        // else {
-        //     alert('Could not found out your product,please confirm your custom setting for the product');
-        //     location.href = 'https://www.supremenewyork.com/shop/';
-        // }
+        let productIndex = getRandom(0, newProduct.length - 1);
+        newProduct[productIndex].click();
+    } else {
+        for (let i = 0; i < productArr.length; i++) {
+            if (productArr[i].innerHTML.indexOf(firstUpperCase(customInfo.keyword)) !== -1 && colorArr[i].innerHTML.indexOf(firstUpperCase(customInfo.color)) !== -1) {
+                productArr[i].click();
+                break;
+            }
+            // else {
+            //     alert('Could not found out your product,please confirm your custom setting for the product');
+            //     location.href = 'https://www.supremenewyork.com/shop/';
+            // }
+        }
     }
 }
 
@@ -105,7 +127,7 @@ let selectProduct = (productArr, colorArr, customInfo) => {
  * @param {尺码数组} sizeArr 
  * @param {自定义关键字 颜色 尺码信息} customInfo 
  */
-let selectSize = (sizeArr, customInfo) => {
+const selectSize = (sizeArr, customInfo) => {
     let soldOut = document.querySelector('#add-remove-buttons b.sold-out');
     if (soldOut) {
         alert('Product Sold-out,please retry or change product..');
@@ -116,7 +138,7 @@ let selectSize = (sizeArr, customInfo) => {
             customInfo.size = sizes[sizeIndex];
         }
         for (let i = 0; i < sizeArr.length; i++) {
-            if (sizeArr[i].innerHTML.indexOf(customInfo.size) !== -1) {
+            if (sizeArr[i].innerHTML.indexOf(firstUpperCase(customInfo.size)) !== -1) {
                 sizeArr[i].selected = true;
                 break;
             }
@@ -127,7 +149,7 @@ let selectSize = (sizeArr, customInfo) => {
 }
 
 //结账方法
-let checkout = (checkoutInfo) => {
+const checkout = (checkoutInfo) => {
     console.log(checkoutInfo);
     document.querySelector('#order_billing_name').value = checkoutInfo.fullname;
     document.querySelector('#order_email').value = checkoutInfo.email;
@@ -150,7 +172,7 @@ let checkout = (checkoutInfo) => {
 }
 
 //获取随机正数
-let getRandom = (min, max) => {
+const getRandom = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;

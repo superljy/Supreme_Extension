@@ -1,8 +1,8 @@
-/*
-    popup端与content端进行两次通信 (主要因为第一次通信后会发生页面跳转,一次通信无法进行跳转后的操作,所以需要使用第二次通信保证接下来的操作生效)
-    第一次,把在popup端输入的数据传递过去content端,并保存在页面缓存中,页面跳转到相关的类目
-    第二次,content页面跳转后,popup端再次发起通信,进行加车操作,读取的是第一次连接时缓存在页面本地的数据
-*/
+/**
+ * Created by August@2020.8
+ * Popup_Script
+ * 
+ */
 
 window.onload = () => {
     console.log('Popup');
@@ -94,11 +94,11 @@ window.onload = () => {
 
 
 //首字母大写
-let firstUpperCase = ([first, ...rest]) => {
+const firstUpperCase = ([first, ...rest]) => {
     return first.toUpperCase() + rest.join('');
 }
 
-let getCustomInfo = () => {
+const getCustomInfo = () => {
     //获取类目,关键字,尺码,延迟时间
     let message = {
         category: document.querySelector('#category').value,
@@ -134,7 +134,7 @@ let getCustomInfo = () => {
     第二次短连接,传递不同的msgSymbol识别不同的通信
     第二次的通信是要告诉content端进行搜索商品和加入购物车的操作
 */
-let addToCart = () => {
+const addToCart = () => {
     chrome.tabs.query({
         active: true,
         currentWindow: true
@@ -149,10 +149,17 @@ let addToCart = () => {
 }
 
 /**
- * 第三次短连接,传递billing和card的结账信息
- * 第三次的通信是成功加车后,进入到结账页面,自动填充用户信息输入并结账的流程
+ * 监听content端发送过来checkout信息
+ * content端在判断自身已进入checkout页面后向popup端发送信息通知popup端 popup端收到checkout信息后将billing和cc信息发送至content进行自动填充结账
  */
-let checkout = () => {
+chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
+    if (res.msg === 'checkout') {
+        checkout();
+        sendResponse('checkout done');
+    }
+})
+
+const checkout = () => {
     let checkoutInfo = {
         fullname: document.querySelector('#fullname').value,
         email: document.querySelector('#email').value,
@@ -169,6 +176,7 @@ let checkout = () => {
         cvv: document.querySelector('#cvv').value,
         msgSymbol: 'go checkout'
     }
+    //往content端发送checkout信息
     chrome.tabs.query({
         active: true,
         currentWindow: true
@@ -179,16 +187,9 @@ let checkout = () => {
     })
 }
 
-chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
-    if (res.msg === 'checkout') {
-        checkout();
-        sendResponse('checkout done');
-    }
-})
-
 
 //获取billing card等基础信息 并储存到chrome.storage里
-let chromeStorage = () => {
+const chromeStorage = () => {
     //color 判断color是否多个单词组成 并转换首字母大写
     let color = document.querySelector('#color-input').value;
     if (color.indexOf(' ') !== -1) {
