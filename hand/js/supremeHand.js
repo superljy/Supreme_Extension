@@ -33,13 +33,20 @@ window.onload = () => {
     }, true);
 
     let inputInfos = document.querySelectorAll('.content input');
+    let selectedInfo = document.querySelector('#category');
     for (info of inputInfos) {
         info.addEventListener('blur', () => {
             chromeStorage();
         })
     };
+    selectedInfo.addEventListener('change', () => {
+        chromeStorage();
+    })
 
-    //获取存储在chrome.storage的数据
+    /**
+     * 获取存储在chrome.storage的数据
+     * 当chrome.storage中存在同样键名 则返回该键的值
+     */
     chrome.storage.sync.get({
         category: null,
         keyword: null,
@@ -102,18 +109,17 @@ const getCustomInfo = () => {
     //获取类目,关键字,尺码,延迟时间
     let message = {
         category: document.querySelector('#category').value,
-        keyword: firstUpperCase(document.querySelector('#keyword-input').value),
+        keyword: document.querySelector('#keyword-input').value.indexOf(',') === -1 ? document.querySelector('#keyword-input').value.split() : document.querySelector('#keyword-input').value.split(','),
         color: document.querySelector('#color-input').value,
         size: firstUpperCase(document.querySelector('#size-input').value),
         delay: document.querySelector('#delay-input').value,
         msgSymbol: 'redirect to category'
     }
-
-    /* 
-        使用短连接进行,把输入的数据传递过去,透过不同的message信息识别不同的通信链接,如这里的msgSymbol
-        第一次的通信把输入的keyword等信息传递到content端并根据输入的分类跳转到对应的类目商品中
-        收到content端回应后执行后续加车操作
-    */
+    /**
+     * 使用短连接进行,把输入的数据传递过去,透过不同的message信息识别不同的通信链接,如这里的msgSymbol
+     * 第一次的通信把输入的keyword等信息传递到content端并根据输入的分类跳转到对应的类目商品中
+     * 收到content端回应后执行后续加车操作
+     */
     let params = {
         active: true,
         currentWindow: true
@@ -130,10 +136,10 @@ const getCustomInfo = () => {
     })
 }
 
-/*
-    第二次短连接,传递不同的msgSymbol识别不同的通信
-    第二次的通信是要告诉content端进行搜索商品和加入购物车的操作
-*/
+/**
+ * 第二次短连接,传递不同的msgSymbol识别不同的通信
+ * 第二次的通信是要告诉content端进行搜索商品和加入购物车的操作
+ */
 const addToCart = () => {
     chrome.tabs.query({
         active: true,
@@ -159,6 +165,9 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     }
 })
 
+/**
+ * 通知content端进行结账操作 并将popup端录入的billing vcc信息传送到content端
+ */
 const checkout = () => {
     let checkoutInfo = {
         fullname: document.querySelector('#fullname').value,
@@ -188,8 +197,20 @@ const checkout = () => {
 }
 
 
-//获取billing card等基础信息 并储存到chrome.storage里
+//获取输入的product billing card等基础信息 并储存到chrome.storage里 方便下次直接使用
 const chromeStorage = () => {
+    //keyword 判断是否多个单词 并转换首字母大写
+    let keyword = document.querySelector('#keyword-input').value;
+    if (keyword.indexOf(',') !== -1) {
+        let kwArr = keyword.split(',');
+        let upperKw = [];
+        for (kw of kwArr) {
+            upperKw.push(firstUpperCase(kw));
+        }
+        keyword = upperKw.join(',');
+    } else {
+        keyword = firstUpperCase(keyword);
+    }
     //color 判断color是否多个单词组成 并转换首字母大写
     let color = document.querySelector('#color-input').value;
     if (color.indexOf(' ') !== -1) {
@@ -204,7 +225,7 @@ const chromeStorage = () => {
     }
     let storageInfo = {
         category: document.querySelector('#category').value,
-        keyword: firstUpperCase(document.querySelector('#keyword-input').value),
+        keyword: keyword,
         color: color,
         size: firstUpperCase(document.querySelector('#size-input').value),
         delay: document.querySelector('#delay-input').value,

@@ -18,10 +18,10 @@ const firstUpperCase = ([first, ...rest]) => {
     return first.toUpperCase() + rest.join('');
 }
 
-/*
-    第一次短连接
-    接收第一次popup端发送过来的用户输入信息,并在本地缓存起来,方便页面跳转后再次使用同样的信息
-    写入缓存并控制跳转 发送response到popup端告知第一步已完成
+/**
+ * 第一次短连接
+ * 接收第一次popup端发送过来的用户输入信息,并在本地缓存起来,方便页面跳转后再次使用同样的信息
+ * 写入缓存并控制跳转 发送response到popup端告知第一步已完成
 */
 chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     if (res.msgSymbol === 'redirect to category') {
@@ -34,10 +34,11 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     }
 })
 
-/*
-    第二次短连接
-    第二次发起的连接,判断msgSymbol,进行商品搜索和加车操作
-*/
+/**
+ * 第二次短连接
+ * 第二次发起的连接,判断msgSymbol,进行商品搜索和加车操作
+ */
+
 chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     if (res.msgSymbol === 'search and add') {
         addToCart();
@@ -74,6 +75,13 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
  */
 const addToCart = async () => {
     let customInfo = JSON.parse(window.localStorage.customInfo);
+    //先确保keyword如果多个单词的话 每个单词首字母要大写
+    let kw = customInfo.keyword;
+    for (k of kw) {
+        firstUpperCase(k);
+    }
+    customInfo.keyword = kw;
+    //确保进入相应分类页面
     if (location.href === 'https://www.supremenewyork.com/shop/all/' + customInfo.category) {
         //获取商品和颜色
         let productArr = document.querySelectorAll('.product-name .name-link');
@@ -94,51 +102,68 @@ const addToCart = async () => {
 
 /**
  * 判断关键字与颜色 选择商品方法
- * @param {页面中所有商品标题的数组} productArr 
- * @param {对应商品颜色的数组} colorArr 
- * @param {自定义关键字 颜色 尺码信息} customInfo 
+ * @param {Array 页面中所有商品标题的数组} productArr 
+ * @param {Array 对应商品颜色的数组} colorArr 
+ * @param {Object 自定义关键字 颜色 尺码信息} customInfo 
  */
 const selectProduct = (productArr, colorArr, customInfo) => {
+    //判断是否存在多个关键字,若是,则进入判断 并返回多关键字匹配后的productArr 直接供后续颜色尺码选择用
+    if (customInfo.keyword.length > 1) {
+        //将多个关键字的用管道符拼接成以管道符分隔的字符串
+        let mutilKeywordString = customInfo.keyword.join('|');
+        //将分隔后的字符串作为正则的公式
+        let mutilKeywordReg = new RegExp(mutilKeywordString, 'ig');
+        let newProductArr = [];
+        for (let i = 0; i < productArr.length; i++) {
+            //查找与正则公式匹配的商品
+            if (mutilKeywordReg.test(productArr[i].innerHTML)) {
+                newProductArr.push(productArr[i]);
+            }
+        }
+        //将productArr更新为经过正则筛选后的新商品列表(都是满足关键字的商品)
+        productArr = newProductArr;
+    }
+    //若颜色填写random 则进入此处 利用颜色和商品数量是对应的关系 直接随机选取一件匹配关键字的商品 达到随机颜色的效果
     if (customInfo.color.toLowerCase() === 'random') {
         let newProduct = [];
         for (let i = 0; i < productArr.length; i++) {
-            if (productArr[i].innerHTML.indexOf(firstUpperCase(customInfo.keyword)) !== -1) {
+            if (productArr[i].innerHTML.indexOf(firstUpperCase(customInfo.keyword[0])) !== -1) {
                 newProduct.push(productArr[i]);
             }
         }
         let productIndex = getRandom(0, newProduct.length - 1);
         newProduct[productIndex].click();
-    } else {
-        for (let i = 0; i < productArr.length; i++) {
-            if (productArr[i].innerHTML.indexOf(firstUpperCase(customInfo.keyword)) !== -1 && colorArr[i].innerHTML.indexOf(firstUpperCase(customInfo.color)) !== -1) {
-                productArr[i].click();
-                break;
-            }
-            // else {
-            //     alert('Could not found out your product,please confirm your custom setting for the product');
-            //     location.href = 'https://www.supremenewyork.com/shop/';
-            // }
+        return;
+    }
+    //若没有多个关键字且指定了一个颜色的,直接查找对应关键字和颜色的商品
+    for (let i = 0; i < productArr.length; i++) {
+        if (productArr[i].innerHTML.indexOf(firstUpperCase(customInfo.keyword[0])) !== -1 && colorArr[i].innerHTML.indexOf(firstUpperCase(customInfo.color)) !== -1) {
+            productArr[i].click();
+            break;
         }
     }
 }
 
 /**
  * 判断尺码并进行加车方法 中间会判断商品是否已售罄
- * @param {尺码数组} sizeArr 
- * @param {自定义关键字 颜色 尺码信息} customInfo 
+ * @param {Array 尺码数组} sizeArr 
+ * @param {Object 自定义关键字 颜色 尺码信息} customInfo 
  */
 const selectSize = (sizeArr, customInfo) => {
+    //增加判断当前商品是否处于sold out状态 是则跳出提示 否则选择尺码
     let soldOut = document.querySelector('#add-remove-buttons b.sold-out');
     if (soldOut) {
         alert('Product Sold-out,please retry or change product..');
     } else {
+        //尺码项是random的处理 先自动随机选取尺码 复制到customInfo.size上
         const sizes = ['Small', 'Medium', 'Large', 'XLarge'];
         if (customInfo.size.toLowerCase() === 'random') {
             let sizeIndex = getRandom(0, 3);
             customInfo.size = sizes[sizeIndex];
         }
+        //根据customInfo.size选取对应尺码
         for (let i = 0; i < sizeArr.length; i++) {
-            if (sizeArr[i].innerHTML.indexOf(firstUpperCase(customInfo.size)) !== -1) {
+            if (sizeArr[i].innerHTML.indexOf(customInfo.size) !== -1) {
                 sizeArr[i].selected = true;
                 break;
             }
@@ -148,7 +173,10 @@ const selectSize = (sizeArr, customInfo) => {
 
 }
 
-//结账方法
+/**
+ * 加入购物车成功后进入结账页面 自动填充地址信用卡信息进行结账
+ * @param {object 包含billing和vcc信息} checkoutInfo 
+ */
 const checkout = (checkoutInfo) => {
     console.log(checkoutInfo);
     document.querySelector('#order_billing_name').value = checkoutInfo.fullname;
@@ -171,7 +199,7 @@ const checkout = (checkoutInfo) => {
     }, 500);
 }
 
-//获取随机正数
+//获取随机正数 这里用于颜色和尺码是random时的处理
 const getRandom = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
