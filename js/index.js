@@ -41,8 +41,8 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
 
 chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     if (res.msgSymbol === 'search and add') {
-        addToCart();
         sendResponse('start to add');
+        addToCart();
     }
 })
 

@@ -149,7 +149,7 @@ const addToCart = () => {
             msgSymbol: 'search and add'
         }, (res) => {
             console.log(res);
-            checkout();
+            // checkout();
         })
     })
 }
