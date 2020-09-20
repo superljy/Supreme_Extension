@@ -1,7 +1,6 @@
 /**
- * Created by August@2020.8
+ * Created by August @2020.8
  * Popup_Script
- * 
  */
 
 window.onload = () => {
@@ -148,8 +147,10 @@ const addToCart = () => {
         chrome.tabs.sendMessage(tabs[0].id, {
             msgSymbol: 'search and add'
         }, (res) => {
-            console.log(res);
-            // checkout();
+            if (res) {
+                return console.log(res);
+            }
+            addToCart();
         })
     })
 }

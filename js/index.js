@@ -1,7 +1,6 @@
 /**
- * Created by August@2020.8
+ * Created by August @2020.8
  * Content_Script
- * 
  */
 
 console.log('Content_Script');
@@ -22,7 +21,7 @@ const firstUpperCase = ([first, ...rest]) => {
  * 第一次短连接
  * 接收第一次popup端发送过来的用户输入信息,并在本地缓存起来,方便页面跳转后再次使用同样的信息
  * 写入缓存并控制跳转 发送response到popup端告知第一步已完成
-*/
+ */
 chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     if (res.msgSymbol === 'redirect to category') {
         window.localStorage.setItem('customInfo', JSON.stringify(res));
@@ -51,12 +50,18 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
  * 如已到达则发信息通知popup端执行checkout的步骤
  * (content端可用的chrome api只有onMessage sendMessage这两种,直接使用runtime.sendMessage发送消息 在popup端监听即可)
  */
-if (location.href === 'https://www.supremenewyork.com/checkout') {
+const tellPopupToCheckout = () => {
     chrome.runtime.sendMessage({
         msg: 'checkout'
     }, (res) => {
-        console.log(res);
+        if (res) {
+            return console.log(res);
+        }
+        tellPopupToCheckout();
     })
+}
+if (location.href === 'https://www.supremenewyork.com/checkout') {
+    tellPopupToCheckout();
 }
 
 /**
@@ -79,6 +84,7 @@ const addToCart = async () => {
     let kw = customInfo.keyword;
     for (k of kw) {
         firstUpperCase(k);
+        console.log(k);
     }
     customInfo.keyword = kw;
     //确保进入相应分类页面
