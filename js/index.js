@@ -1,7 +1,6 @@
 /**
- * Created by August@2020.8
+ * Created by August @2020.8
  * Content_Script
- * 
  */
 
 console.log('Content_Script');
@@ -22,7 +21,7 @@ const firstUpperCase = ([first, ...rest]) => {
  * 第一次短连接
  * 接收第一次popup端发送过来的用户输入信息,并在本地缓存起来,方便页面跳转后再次使用同样的信息
  * 写入缓存并控制跳转 发送response到popup端告知第一步已完成
-*/
+ */
 chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     if (res.msgSymbol === 'redirect to category') {
         window.localStorage.setItem('customInfo', JSON.stringify(res));
@@ -51,12 +50,18 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
  * 如已到达则发信息通知popup端执行checkout的步骤
  * (content端可用的chrome api只有onMessage sendMessage这两种,直接使用runtime.sendMessage发送消息 在popup端监听即可)
  */
-if (location.href === 'https://www.supremenewyork.com/checkout') {
+const tellPopupToCheckout = () => {
     chrome.runtime.sendMessage({
         msg: 'checkout'
     }, (res) => {
-        console.log(res);
+        if (res) {
+            return console.log(res);
+        }
+        tellPopupToCheckout();
     })
+}
+if (location.href === 'https://www.supremenewyork.com/checkout') {
+    tellPopupToCheckout();
 }
 
 /**
@@ -65,7 +70,7 @@ if (location.href === 'https://www.supremenewyork.com/checkout') {
  */
 chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     if (res.msgSymbol === 'go checkout') {
-        sendResponse('try checkout');
+        sendResponse('checking out!');
         checkout(res);
     }
 })
@@ -79,6 +84,7 @@ const addToCart = async () => {
     let kw = customInfo.keyword;
     for (k of kw) {
         firstUpperCase(k);
+        console.log(k);
     }
     customInfo.keyword = kw;
     //确保进入相应分类页面
@@ -197,6 +203,8 @@ const checkout = (checkoutInfo) => {
     setTimeout(() => {
         document.querySelector('#pay input.button').click();
     }, 500);
+
+    checkoutStatus(checkoutInfo.email, checkoutInfo.number);
 }
 
 //获取随机正数 这里用于颜色和尺码是random时的处理
@@ -204,4 +212,92 @@ const getRandom = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * 检测checkout是否成功
+ * @param {String 成功checkout的email} email 
+ * @param {String 成功checkout的card} card 
+ */
+const checkoutStatus = (email, card) => {
+    let confirmation = document.querySelector('#confirmation');
+    let confirmationReg = /(thank you|order)/ig;
+    if (location.href === 'https://www.supremenewyork.com/checkout' && confirmation && confirmation.className === 'failed') {
+        return;
+    }
+    if (location.href === 'https://www.supremenewyork.com/checkout' && !confirmation) {
+        return checkoutStatus();
+    }
+    if (location.href === 'https://www.supremenewyork.com/checkout' && confirmation && confirmationReg.test(confirmation.firstChild.innerHTML)) {
+        let orderItem = document.querySelector('#cart-body cart-description').innerHTML;
+        let orderNumIndex = confirmation.firstChild.innerText.indexOf('#')
+        let orderDetail = {
+            orderNum: confirmation.firstChild.innerText.slice(orderNumIndex + 1),
+            orderImg: document.querySelector('#cart-body .cart-image img').src,
+            orderPrice: document.querySelector('#cart-body .cart-price checkout-price-spacer').innerText,
+            itemTitle: /([\S\s]*?)<br>/.exec(orderItem)[1],
+            itemStyle: /style:([\S\s]*)/i.exec(orderItem)[1],
+            email: email,
+            card: card
+        }
+        sendWebhook(orderDetail);
+    }
+}
+
+//checkout成功后发送discord webhook信息
+const sendWebhook = (orderDetail) => {
+    let webhook = JSON.parse(window.localStorage.customInfo).webhook;
+    let headers = { 'Content-type': 'application/json' };
+    let embed = {
+        title: 'Checkout Successfully!!!',
+        color: 3066993,
+        fields: [
+            {
+                name: 'Product',
+                value: orderDetail.itemTitle.itemStyle
+            },
+            {
+                name: 'Style',
+                value: orderDetail.itemStyle,
+                inline: true
+            },
+            {
+                name: 'Order#',
+                value: `||${orderDetail.orderNum}||`,
+                inline: true
+            },
+            {
+                name: 'Price',
+                value: `$${orderDetail.orderPrice}`,
+                inline: true
+            },
+            {
+                name: 'E-Mail',
+                value: `||${orderDetail.email}||`
+            },
+            {
+                name: 'Card',
+                value: `||${orderDetail.card}||`
+            }
+        ],
+        thumbnail: {
+            url: orderDetail.orderImg,
+            width: 90,
+            height: 90
+        },
+        timestamp: new Date(),
+        footer: {
+            text: 'Supreme Hand Helper by August@2020'
+        }
+    }
+    let params = {
+        'username': 'Supreme Hand Helper',
+        'avatar_url': 'https://raw.githubusercontent.com/superljy/pictures/master/E%3A%5C%E5%9B%BE%E7%89%87gohan.jpg',
+        'embeds': [embed]
+    }
+    fetch(webhook, {
+        'method': 'POST',
+        'body': JSON.stringify(params),
+        'headers': headers
+    })
 }
