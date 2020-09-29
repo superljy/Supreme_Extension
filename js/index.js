@@ -81,12 +81,9 @@ chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
 const addToCart = async () => {
     let customInfo = JSON.parse(window.localStorage.customInfo);
     //先确保keyword如果多个单词的话 每个单词首字母要大写
-    let kw = customInfo.keyword;
-    for (k of kw) {
-        firstUpperCase(k);
-        console.log(k);
+    for (let i = 0; i < customInfo.keyword.length; i++) {
+        customInfo.keyword[i] = firstUpperCase(customInfo.keyword[i])
     }
-    customInfo.keyword = kw;
     //确保进入相应分类页面
     if (location.href === 'https://www.supremenewyork.com/shop/all/' + customInfo.category) {
         //获取商品和颜色
@@ -115,15 +112,27 @@ const addToCart = async () => {
 const selectProduct = (productArr, colorArr, customInfo) => {
     //判断是否存在多个关键字,若是,则进入判断 并返回多关键字匹配后的productArr 直接供后续颜色尺码选择用
     if (customInfo.keyword.length > 1) {
-        //将多个关键字的用管道符拼接成以管道符分隔的字符串
-        let mutilKeywordString = customInfo.keyword.join('|');
-        //将分隔后的字符串作为正则的公式
-        let mutilKeywordReg = new RegExp(mutilKeywordString, 'ig');
-        let newProductArr = [];
+        //两个数组,newProductArr用来保存筛选后的产品列表,keywordStore用来保存多关键字中匹配的关键字
+        let newProductArr = [], keywordStore = [];
+        /**
+         * 使用双循环
+         * 先遍历商品列表,在商品列表的基础上再遍历关键字
+         * 没有匹配到关键字的,continue跳入下一个循环迭代,匹配到关键字的将关键字放入keywordStore数组中
+         * 判断keywordStore数组中的关键字长度是否与原来输入的关键字长度一致,如一致 则说明命中指定关键字商品,将命中商品放入newProductArr中,并置空keywordStore进入下一轮循环判断,如长度不一致,说明没有命中,直接置空keywordStore,进入下一轮循环,直至匹配完所有商品
+         */
         for (let i = 0; i < productArr.length; i++) {
-            //查找与正则公式匹配的商品
-            if (mutilKeywordReg.test(productArr[i].innerHTML)) {
+            for (let j = 0; j < customInfo.keyword.length; j++) {
+                if (!productArr[i].innerHTML.includes(customInfo.keyword[j])) {
+                    continue;
+                } else {
+                    keywordStore.push(customInfo.keyword[j]);
+                }
+            }
+            if (keywordStore.length === customInfo.keyword.length) {
                 newProductArr.push(productArr[i]);
+                keywordStore = [];
+            } else {
+                keywordStore = [];
             }
         }
         //将productArr更新为经过正则筛选后的新商品列表(都是满足关键字的商品)
@@ -249,7 +258,7 @@ const sendWebhook = (orderDetail) => {
     let webhook = JSON.parse(window.localStorage.customInfo).webhook;
     let headers = { 'Content-type': 'application/json' };
     let embed = {
-        title: 'Checkout Successfully!!!',
+        title: `:cook:   Checkout Successfully!!!   :cook:`,
         color: 3066993,
         fields: [
             {
