@@ -112,6 +112,7 @@ const getCustomInfo = () => {
         color: document.querySelector('#color-input').value,
         size: firstUpperCase(document.querySelector('#size-input').value),
         delay: document.querySelector('#delay-input').value,
+        webhook: document.querySelector('#webhook').value,
         msgSymbol: 'redirect to category'
     }
     /**

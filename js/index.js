@@ -70,7 +70,7 @@ if (location.href === 'https://www.supremenewyork.com/checkout') {
  */
 chrome.runtime.onMessage.addListener((res, sender, sendResponse) => {
     if (res.msgSymbol === 'go checkout') {
-        sendResponse('try checkout');
+        sendResponse('checking out!');
         checkout(res);
     }
 })
@@ -203,6 +203,8 @@ const checkout = (checkoutInfo) => {
     setTimeout(() => {
         document.querySelector('#pay input.button').click();
     }, 500);
+
+
 }
 
 //获取随机正数 这里用于颜色和尺码是random时的处理
@@ -210,4 +212,40 @@ const getRandom = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//检测checkout是否成功
+const checkoutStatus = () => {
+    let confirmation = document.querySelector('#confirmation');
+    let confirmationReg = /(thank you|order)/ig;
+    if (location.href === 'https://www.supremenewyork.com/checkout' && confirmation && confirmation.className === 'failed') {
+        return;
+    }
+    if (location.href === 'https://www.supremenewyork.com/checkout' && !confirmation) {
+        return checkoutStatus();
+    }
+    if (location.href === 'https://www.supremenewyork.com/checkout' && confirmation && confirmationReg.test(confirmation.firstChild.innerHTML)) {
+        let orderItem = document.querySelector('#cart-body cart-description').innerHTML;
+        let orderDetail = {
+            orderNumIndex: confirmation.firstChild.innerText.indexOf('#'),
+            orderImg: document.querySelector('#cart-body .cart-image img').src,
+            itemTitle: /([\S\s]*?)<br>/.exec(orderItem)[1],
+            itemStyle: /style:([\S\s]*)/i.exec(orderItem)[1]
+        }
+        sendWebhook(orderDetail);
+    }
+}
+
+//checkout成功后发送discord webhook信息
+const sendWebhook = (orderDetail) => {
+    let webhook = JSON.parse(window.localStorage.customInfo).webhook;
+    let embed = {
+        title: 'Checkout Successfully',
+        fielsd: [{
+            name: 'Product',
+            value: orderDetail.itemTitle
+        }]
+
+    }
+    fetch(webhook, )
 }
